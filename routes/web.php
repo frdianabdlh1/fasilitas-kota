@@ -19,16 +19,8 @@ Route::get('/reports', [ReportController::class, 'index'])
 Route::get('/reports/{id}', [ReportController::class, 'show'])
     ->name('reports.show');
 
-// ===== Bab 5: CRUD Kategori (Create & Read) =====
+// ===== Bab 6: CRUD Kategori lengkap (Resource Route) =====
+// Menggantikan 3 route manual Bab 5. Menghasilkan 7 route:
+// index, create, store, show, edit, update, destroy
 
-Route::get('/categories',
-    [CategoryController::class, 'index']
-)->name('categories.index');
-
-Route::get('/categories/create',
-    [CategoryController::class, 'create']
-)->name('categories.create');
-
-Route::post('/categories',
-    [CategoryController::class, 'store']
-)->name('categories.store');
+Route::resource('categories', CategoryController::class);
