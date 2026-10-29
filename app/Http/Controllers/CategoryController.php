@@ -7,12 +7,20 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    // READ: daftar kategori
-    public function index()
+    // READ: daftar kategori + pencarian + pagination
+    public function index(Request $request)
     {
-        $categories = Category::orderBy('name')->get();
+        $search = $request->query('q');
 
-        return view('categories.index', compact('categories'));
+        $categories = Category::query()
+            ->when($search, function ($query, $search) {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->orderBy('name')
+            ->paginate(5)
+            ->withQueryString();
+
+        return view('categories.index', compact('categories', 'search'));
     }
 
     // CREATE: tampilkan form tambah
@@ -21,15 +29,19 @@ class CategoryController extends Controller
         return view('categories.create');
     }
 
-    // CREATE: simpan data baru
+    // CREATE: validasi lalu simpan
     public function store(Request $request)
     {
-        Category::create([
-            'name' => $request->name,
-            'description' => $request->description,
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:500',
         ]);
 
-        return redirect()->route('categories.index');
+        Category::create($validated);
+
+        return redirect()
+            ->route('categories.index')
+            ->with('success', 'Kategori berhasil ditambahkan.');
     }
 
     // DETAIL: tampilkan satu record
@@ -52,25 +64,31 @@ class CategoryController extends Controller
         ]);
     }
 
-    // UPDATE: simpan perubahan
+    // UPDATE: validasi lalu simpan perubahan
     public function update(Request $request, string $category)
     {
-        $item = Category::findOrFail($category);
+        $category = Category::findOrFail($category);
 
-        $item->update([
-            'name' => $request->name,
-            'description' => $request->description,
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'description' => 'nullable|string|max:500',
         ]);
 
-        return redirect()->route('categories.index');
+        $category->update($validated);
+
+        return redirect()
+            ->route('categories.index')
+            ->with('success', 'Kategori berhasil diperbarui.');
     }
 
-    // DELETE: hapus record (hard delete)
+    // DELETE: hapus record
     public function destroy(string $category)
     {
-        $item = Category::findOrFail($category);
-        $item->delete();
+        $category = Category::findOrFail($category);
+        $category->delete();
 
-        return redirect()->route('categories.index');
+        return redirect()
+            ->route('categories.index')
+            ->with('success', 'Kategori berhasil dihapus.');
     }
 }

@@ -11,13 +11,22 @@
         <div class="mb-3">
             <label class="form-label">Nama Kategori</label>
             <input type="text" name="name"
-                   class="form-control" required>
+                   value="{{ old('name') }}"
+                   class="form-control @error('name') is-invalid @enderror">
+
+            @error('name')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
         </div>
 
         <div class="mb-3">
             <label class="form-label">Deskripsi</label>
             <textarea name="description"
-                      class="form-control"></textarea>
+                      class="form-control @error('description') is-invalid @enderror">{{ old('description') }}</textarea>
+
+            @error('description')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
         </div>
 
         <button class="btn btn-primary">Simpan</button>
